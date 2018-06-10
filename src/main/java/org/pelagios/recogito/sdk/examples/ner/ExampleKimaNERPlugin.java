@@ -86,27 +86,16 @@ public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 		while (runningIdx < words.length) {
 			String nextWord = words[runningIdx];
 			runningOffset = text.indexOf(nextWord, runningOffset);
-
-			if (hasWord(nextWord, _aliases)) {
-				phrases.add(new Entity(
-							nextWord,
-							EntityType.LOCATION,
-							runningOffset
-							));
-			}
-			else {
-				for(int j = 0; j < MAX_WORDS && runningIdx + j < words.length; ++j) {
-					List<String> subWords = Arrays.asList(words).subList(runningIdx, runningIdx + j);
-					String expr = String.join(" ", subWords);
-					if (hasWord(expr, _aliases)) {
-						phrases.add(new Entity(
-									expr,
-									EntityType.LOCATION,
-									runningOffset
-									));
-					}
+            for (int j = 0; j < MAX_WORDS && runningIdx + j < words.length; ++j) {
+				List<String> subWords = Arrays.asList(words).subList(runningIdx, runningIdx + j + 1);
+				String expr = String.join(" ", subWords);
+				if (hasWord(expr, _aliases)) {
+					phrases.add(new Entity(expr, EntityType.LOCATION, runningOffset));
+					runningIdx += j;
+					break;
 				}
 			}
+            
 			runningIdx++;
 			runningOffset += nextWord.length();
 		}
