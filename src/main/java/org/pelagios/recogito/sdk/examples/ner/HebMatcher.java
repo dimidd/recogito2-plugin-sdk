@@ -1,6 +1,7 @@
 package org.pelagios.recogito.sdk.examples.ner;
+
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * Basic matching of Hebrew place names.
@@ -11,33 +12,38 @@ public interface HebMatcher {
 	// IMPORTANT: Keep it sorted
     final static char [] PREFS = {'ב', 'ו', 'ל', 'מ', 'ש'};
 
-	default boolean hasWord(String word, Collection<String> aliases) {
+	default String hasWord(String word, Map<String, String> aliases, boolean prefixes) {
         word = normalizeWord(word);
+        String val;
         if (word == null) {
-             return false;
+             return null;
         }
-        if (aliases.contains(word)) {
-            return true;
+        if ((val = aliases.get(word)) != null) {
+            return val;
+        }
+        
+        if (!prefixes) {
+        		return null;
         }
         // TODO: Refactor
         char head = word.charAt(0);
         String tail = word.substring(1);
         if (Arrays.binarySearch(PREFS, head) > -1) {
-            if (aliases.contains(tail)) {
-                return true;
+            if ((val = aliases.get(tail)) != null) {
+                return val;
             }
             else if (tail.length() > 0) {
                 char head2 = tail.charAt(0);
                 String tail2 = tail.substring(1);
                 if (head == 'ו' || head == 'ש') {
                     if (head2 != head && Arrays.binarySearch(PREFS, head2) > -1) {
-                        return aliases.contains(tail2);
+                        return aliases.get(tail2);
                     }
                 }
             }
         }
 
-        return false;
+        return null;
 	}
 
 	public static String normalizeWord(String word) {
