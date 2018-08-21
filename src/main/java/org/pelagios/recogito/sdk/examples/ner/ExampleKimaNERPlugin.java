@@ -101,7 +101,7 @@ public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 				if ((gazId = hasWord(expr, _aliases, true)) != null) {
 					URI gnUri = null;
 					try {
-						gnUri = new URI("https://www.geonames.org/" + gazId);
+						gnUri = new URI("http://sws.geonames.org/" + gazId);
 					} catch (URISyntaxException e) {
 						e.printStackTrace();
 					}
