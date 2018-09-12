@@ -1,75 +1,78 @@
 package org.pelagios.recogito.sdk.examples.ner;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.logging.Logger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.StreamHandler;
+import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
+import org.pelagios.recogito.sdk.ner.Entity;
 import org.pelagios.recogito.sdk.ner.EntityType;
 import org.pelagios.recogito.sdk.ner.NERPlugin;
-import org.pelagios.recogito.sdk.ner.Entity;
 
 public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 	private static final Logger LOGGER = Logger.getLogger(ExampleKimaNERPlugin.class.getName());
-	private StreamHandler sh = new StreamHandler(System.err, new SimpleFormatter());
+	private final StreamHandler sh = new StreamHandler(System.err, new SimpleFormatter());
 	public static final int MAX_WORDS = 7;
 	private HashMap<String, String> _aliases;
-	private char[] _prefs = { 'ב', 'ל', 'מ', 'ש', 'ו' };
-	private static final String NAMES_FILE = "/kima_gn.tsv";
+	private final char[] _prefs = { 'ב', 'ל', 'מ', 'ש', 'ו' };
+	private static final String NAMES_FILE = "/nbab1940_gn.tsv";
 	private static final int N_MATCHES_TO_LOG = 6;
 
 	public ExampleKimaNERPlugin() {
 
 		try {
-			Arrays.sort(_prefs);
-			InputStream input = getClass().getResourceAsStream(NAMES_FILE);
-			BufferedReader in = new BufferedReader(new InputStreamReader(input));
+			Arrays.sort(this._prefs);
+			final InputStream input = getClass().getResourceAsStream(NAMES_FILE);
+			final BufferedReader in = new BufferedReader(new InputStreamReader(input));
 			String str;
-			_aliases = new HashMap<String, String>();
+			this._aliases = new HashMap<String, String>();
 
 			while ((str = in.readLine()) != null) {
-				String[] splitted = str.split("\t");
-				_aliases.put(splitted[0], splitted[1]);
+				final String[] splitted = str.split("\t");
+				this._aliases.put(splitted[0], splitted[1]);
 			}
 			in.close();
-			LOGGER.addHandler(sh);
-			LOGGER.log( Level.INFO, "KimaNER: succesfully loaded names from '{0}'", NAMES_FILE);
-		} catch (IOException e) {
+			LOGGER.addHandler(this.sh);
+			LOGGER.log( Level.INFO, "KimaNER: succesfully loaded names from {0}", NAMES_FILE);
+		} catch (final IOException e) {
 			e.printStackTrace();
-			_aliases = new HashMap<String, String>();
+			this._aliases = new HashMap<String, String>();
 		}
 	}
 
+	@Override
 	public String getName() {
 		return "Example Kima NER Plugin";
 	}
 
+	@Override
 	public String getDescription() {
 		return "An attempt to use Kima with the Recogito NER plugin interface.";
 	}
 
+	@Override
 	public String getOrganization() {
 		return "Pelagios Commons";
 	}
 
+	@Override
 	public String getVersion() {
 		return "1.0";
 	}
 
 	@Override
 	public List<String> getSupportedLanguages() {
-		List<String> list = new ArrayList<String>();
+		final List<String> list = new ArrayList<String>();
 		list.add("he");
 
 		return list;
@@ -81,8 +84,8 @@ public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 	 */
 	@Override
 	public List<Entity> parse(String text) {
-		String[] words = text.split("\\s+");
-		List<Entity> phrases = new ArrayList<Entity>();
+		final String[] words = text.split("\\s+");
+		final List<Entity> phrases = new ArrayList<Entity>();
 
 		if (words.length == 0)
 			return phrases;
@@ -91,21 +94,24 @@ public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 		int runningOffset = 0;
 
 		while (runningIdx < words.length) {
-			String nextWord = words[runningIdx];
+			final String nextWord = words[runningIdx];
 			runningOffset = text.indexOf(nextWord, runningOffset);
 
 			for (int j = 0; j < MAX_WORDS && runningIdx + j < words.length; ++j) {
-				List<String> subWords = Arrays.asList(words).subList(runningIdx, runningIdx + j + 1);
-				String expr = String.join(" ", subWords);
+				final List<String> subWords = Arrays.asList(words).subList(runningIdx, runningIdx + j + 1);
+				final String expr = String.join(" ", subWords);
 				String gazId = null;
-				if ((gazId = hasWord(expr, _aliases, true)) != null) {
+				final String[] gazArr = hasWord(expr, this._aliases, true);
+				if (gazArr != null) {
+					final String gazExpr = gazArr[0];
+					gazId = gazArr[1];
 					URI gnUri = null;
 					try {
 						gnUri = new URI("http://sws.geonames.org/" + gazId);
-					} catch (URISyntaxException e) {
+					} catch (final URISyntaxException e) {
 						e.printStackTrace();
 					}
-					phrases.add(new Entity(expr, EntityType.LOCATION, runningOffset, gnUri));
+					phrases.add(new Entity(gazExpr, EntityType.LOCATION, runningOffset, gnUri));
 					runningIdx += j;
 					break;
 				}
@@ -115,18 +121,18 @@ public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 			runningOffset += nextWord.length();
 		}
 
-		int maxMatchesToLog = Math.min(phrases.size(), N_MATCHES_TO_LOG);
+		final int maxMatchesToLog = Math.min(phrases.size(), N_MATCHES_TO_LOG);
 		LOGGER.log(
 				Level.INFO,
-				 "KimaNER: found {0} mathces. The first {1}:",
-				 new Object[] {phrases.size(), maxMatchesToLog}
-		);
+				"KimaNER: found {0} mathces. The first {1}:",
+				new Object[] {phrases.size(), maxMatchesToLog}
+				);
 		for (int i = 0; i < maxMatchesToLog; ++i) {
 			LOGGER.log(
-				Level.INFO,
-				"{0}. {1}",
-				new Object[] {i + 1, phrases.get(i).toString()}
-			);
+					Level.INFO,
+					"{0}. {1}",
+					new Object[] {i + 1, phrases.get(i).toString()}
+					);
 		}
 		return phrases;
 	}

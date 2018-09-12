@@ -10,61 +10,56 @@ import java.util.Map;
  */
 public interface HebMatcher {
 	// IMPORTANT: Keep it sorted
-    final static char [] PREFS = {'ב', 'ו', 'ל', 'מ', 'ש'};
+	final static char [] PREFS = {'ב', 'ו', 'ל', 'מ', 'ש'};
 
-	default String hasWord(String word, Map<String, String> aliases, boolean prefixes) {
-        word = normalizeWord(word);
-        String val;
-        if (word == null) {
-             return null;
-        }
-        if ((val = aliases.get(word)) != null) {
-            return val;
-        }
-        
-        if (!prefixes) {
-        		return null;
-        }
-        // TODO: Refactor
-        char head = word.charAt(0);
-        String tail = word.substring(1);
-        if (Arrays.binarySearch(PREFS, head) > -1) {
-            if ((val = aliases.get(tail)) != null) {
-                return val;
-            }
-            else if (tail.length() > 0) {
-                char head2 = tail.charAt(0);
-                String tail2 = tail.substring(1);
-                if (head == 'ו' || head == 'ש') {
-                    if (head2 != head && Arrays.binarySearch(PREFS, head2) > -1) {
-                        return aliases.get(tail2);
-                    }
-                }
-            }
-        }
+	default String[] hasWord(String word, Map<String, String> aliases, boolean prefixes) {
+		word = normalizeWord(word);
+		String val;
+		if (word == null)
+			return null;
+		if ((val = aliases.get(word)) != null)
+			return new String[]{word, val};
 
-        return null;
+		if (!prefixes)
+			return null;
+		// TODO: Refactor
+		final char head = word.charAt(0);
+		final String tail = word.substring(1);
+		if (Arrays.binarySearch(PREFS, head) > -1) {
+			if ((val = aliases.get(tail)) != null)
+				return new String[]{tail, val};
+			else if (tail.length() > 0) {
+				final char head2 = tail.charAt(0);
+				final String tail2 = tail.substring(1);
+				if (head == 'ו' || head == 'ש') {
+					if (head2 != head && Arrays.binarySearch(PREFS, head2) > -1) {
+						val = aliases.get(tail2);
+						return new String[]{tail2, val};
+					}
+				}
+			}
+		}
+
+		return null;
 	}
 
 	public static String normalizeWord(String word) {
-        if (word == null || word.isEmpty()) {
-             return null;
-        }
-        // remove punctuation
-        word = word.replaceAll("[,.;()\\[\\]{}…?!/:]", "");
-        if (word.isEmpty()) {
-             return null;
-        }
-        char first = word.charAt(0);
-        if (first == '"' || first == '\'') {
-            word = word.substring(1);
-        }
-        int len = word.length();
-        char last = word.charAt(len - 1);
-        if (last == '"' || last == '\'') {
-            word = word.substring(0, len - 1);
-        }
+		if (word == null || word.isEmpty())
+			return null;
+		// remove punctuation
+		word = word.replaceAll("[,.;()\\[\\]{}…?!/:]", "");
+		if (word.isEmpty())
+			return null;
+		final char first = word.charAt(0);
+		if (first == '"' || first == '\'') {
+			word = word.substring(1);
+		}
+		final int len = word.length();
+		final char last = word.charAt(len - 1);
+		if (last == '"' || last == '\'') {
+			word = word.substring(0, len - 1);
+		}
 
-        return word;
-    }
+		return word;
+	}
 }
