@@ -11,49 +11,50 @@ import java.util.Objects;
  */
 public class Entity {
 
-  public final String chars;
+	public final String chars;
 
-  public final EntityType entityType;
+	public final EntityType entityType;
 
-  public final int charOffset;
-  
-  public final URI uri;
-  
-  public Entity(String chars, EntityType entityType, int charOffset) {
-    this(chars, entityType, charOffset, null);
-  }
+	public final int charOffset;
 
-  public Entity(String chars, EntityType entityType, int charOffset, URI uri) {
-    this.chars = chars;
-    this.entityType = entityType;
-    this.charOffset = charOffset;
-    this.uri = uri;
-  }
+	public final URI uri;
 
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof Entity))
-    return false;
+	public Entity(String chars, EntityType entityType, int charOffset) {
+		this(chars, entityType, charOffset, null);
+	}
 
-    Entity other = (Entity) obj;
+	public Entity(String chars, EntityType entityType, int charOffset, URI uri) {
+		this.chars = chars;
+		this.entityType = entityType;
+		this.charOffset = charOffset;
+		this.uri = uri;
+	}
 
-    return chars.equals(other.chars) &&
-    entityType.equals(other.entityType) &&
-    charOffset == other.charOffset;
-  }
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Entity))
+			return false;
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(chars, entityType, charOffset);
-  }
+		final Entity other = (Entity) obj;
 
-  public String toString() {
-    return String.join("|",  new String[]{
-                                            chars,
-                                            entityType.toString(),
-                                            Integer.toString(charOffset),
-                                            uri.toString()
-                                         });
-  }
+		return this.chars.equals(other.chars) &&
+				this.entityType.equals(other.entityType) &&
+				this.charOffset == other.charOffset;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.chars, this.entityType, this.charOffset);
+	}
+
+	@Override
+	public String toString() {
+		return String.join("|",  new String[]{
+				this.chars,
+				this.entityType.toString(),
+				Integer.toString(this.charOffset),
+				this.uri != null ? this.uri.toString() : null
+		});
+	}
 
 }
