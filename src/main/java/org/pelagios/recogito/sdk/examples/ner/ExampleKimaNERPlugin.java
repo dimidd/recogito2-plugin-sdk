@@ -25,16 +25,19 @@ public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 	public static final int MAX_WORDS = 7;
 	private HashMap<String, String> _aliases;
 	private final char[] _prefs = { 'ב', 'ל', 'מ', 'ש', 'ו' };
-	private static final String NAMES_FILE = "/nbab1940_gn.tsv";
+	private static final String NAMES_FILE = "/nbab_clean_1940_gn.tsv";
 	private static final int N_MATCHES_TO_LOG = 6;
 
 	public ExampleKimaNERPlugin() {
 
 		try {
+			final InputStream input = ClassLoaderUtil.getResourceAsStream("nbab_clean_1940_gn.tsv", ExampleKimaNERPlugin.class);
 			Arrays.sort(this._prefs);
-			final InputStream input = getClass().getResourceAsStream(NAMES_FILE);
 			final BufferedReader in = new BufferedReader(new InputStreamReader(input));
+			
 			String str;
+			
+			
 			this._aliases = new HashMap<String, String>();
 
 			while ((str = in.readLine()) != null) {
@@ -111,7 +114,14 @@ public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 					} catch (final URISyntaxException e) {
 						e.printStackTrace();
 					}
-					phrases.add(new Entity(gazExpr, EntityType.LOCATION, runningOffset, gnUri));
+					// HebMatcher might have removed prefixes
+					int newOffset = runningOffset + expr.indexOf(gazExpr);
+					if (newOffset > runningOffset){
+						phrases.add(new Entity(gazExpr, EntityType.LOCATION, newOffset, gnUri));
+					}
+					else {
+						phrases.add(new Entity(expr, EntityType.LOCATION, runningOffset, gnUri));
+					}
 					runningIdx += j;
 					break;
 				}
@@ -126,7 +136,7 @@ public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 				Level.INFO,
 				"KimaNER: found {0} mathces. The first {1}:",
 				new Object[] {phrases.size(), maxMatchesToLog}
-				);
+		);
 		for (int i = 0; i < maxMatchesToLog; ++i) {
 			LOGGER.log(
 					Level.INFO,
