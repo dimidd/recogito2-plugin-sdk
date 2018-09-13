@@ -14,17 +14,25 @@ public class KimaNERPluginTest {
 	private final String SAMPLE_TEXT =
 			"המהרל מירושלים נולד בפראג והגיע לליטא, פולין ולוורשה שבאירופה";
 
-	private final Entity firstExpectedMatch = new Entity("ירושלים", EntityType.LOCATION, 6);
-	private final Entity secondExpectedMatch = new Entity("פראג", EntityType.LOCATION, 20);
+	private final Entity[] expectedMatches = new Entity[]{
+			new Entity("ירושלים", EntityType.LOCATION, 7),
+			new Entity("פראג", EntityType.LOCATION, 21),
+			new Entity("ליטא", EntityType.LOCATION, 33),
+			new Entity("פולין", EntityType.LOCATION, 39),
+			new Entity("וורשה", EntityType.LOCATION, 47),
+			new Entity("אירופה", EntityType.LOCATION, 55)
+	};
 
 	@Test
 	public void test() {
 		final ExampleKimaNERPlugin plugin = new ExampleKimaNERPlugin();
 		final List<Entity> entities = plugin.parse(this.SAMPLE_TEXT);
 
-		assertEquals(6, entities.size());
-		assertEquals(this.firstExpectedMatch, entities.get(0));
-		assertEquals(this.secondExpectedMatch, entities.get(1));
+		assertEquals(this.expectedMatches.length, entities.size());
+		for (int i = 0; i < this.expectedMatches.length; ++i) {
+			assertEquals(this.expectedMatches[i], entities.get(i));
+		}
+
 	}
 
 }
