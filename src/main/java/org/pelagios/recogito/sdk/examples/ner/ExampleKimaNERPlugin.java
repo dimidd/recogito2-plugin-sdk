@@ -25,13 +25,13 @@ public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 	public static final int MAX_WORDS = 7;
 	private HashMap<String, String> _aliases;
 	private final char[] _prefs = { 'ב', 'ל', 'מ', 'ש', 'ו' };
-	private static final String NAMES_FILE = "/nbab_clean_1940_gn.tsv";
+	private static final String NAMES_FILE = "nba_1500_1940.tsv";
 	private static final int N_MATCHES_TO_LOG = 6;
 
 	public ExampleKimaNERPlugin() {
 
 		try {
-			final InputStream input = ClassLoaderUtil.getResourceAsStream("nbab_clean_1940_gn.tsv", ExampleKimaNERPlugin.class);
+			final InputStream input = ClassLoaderUtil.getResourceAsStream(NAMES_FILE, ExampleKimaNERPlugin.class);
 			Arrays.sort(this._prefs);
 			final BufferedReader in = new BufferedReader(new InputStreamReader(input));
 			
