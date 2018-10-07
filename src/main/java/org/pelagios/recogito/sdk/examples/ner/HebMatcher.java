@@ -10,8 +10,12 @@ import java.util.Map;
  */
 public interface HebMatcher {
 	// IMPORTANT: Keep it sorted
-	final static char [] PREFS = {'ב', 'ו', 'ל', 'מ', 'ש'};
-
+	final static char [] PREFS = {'ב', 'ו','כ', 'ל', 'מ', 'ש'};
+	final static String [] PREFS2 = {
+			"וב", "ול", "ומ", "וש",
+			"כש",
+			"שב", "של", "שמ"
+	};
 	default String[] hasWord(String word, Map<String, String> aliases, boolean prefixes) {
 		word = normalizeWord(word);
 		String val;
@@ -29,13 +33,11 @@ public interface HebMatcher {
 			if ((val = aliases.get(tail)) != null)
 				return new String[]{tail, val};
 			else if (tail.length() > 0) {
-				final char head2 = tail.charAt(0);
+				final String head2 = word.substring(0, 2);
 				final String tail2 = tail.substring(1);
-				if (head == 'ו' || head == 'ש') {
-					if (head2 != head && Arrays.binarySearch(PREFS, head2) > -1) {
-						val = aliases.get(tail2);
-						return new String[]{tail2, val};
-					}
+				if (Arrays.binarySearch(PREFS2, head2) > -1) {
+					val = aliases.get(tail2);
+					return new String[]{tail2, val};
 				}
 			}
 		}
