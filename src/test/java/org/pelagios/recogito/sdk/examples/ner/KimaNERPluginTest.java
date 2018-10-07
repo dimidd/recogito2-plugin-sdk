@@ -12,7 +12,7 @@ import org.pelagios.recogito.sdk.ner.EntityType;
 public class KimaNERPluginTest {
 
 	private final String SAMPLE_TEXT =
-			"המהרל מירושלים נולד בפראג והגיע לליטא, פולין ולוורשה שבאירופה";
+			"המהרל מירושלים נולד בפראג והגיע לליטא, פולין ולוורשה שבאירופה שוטין";
 
 	private final Entity[] expectedMatches = new Entity[]{
 			new Entity("ירושלים", EntityType.LOCATION, 7),
