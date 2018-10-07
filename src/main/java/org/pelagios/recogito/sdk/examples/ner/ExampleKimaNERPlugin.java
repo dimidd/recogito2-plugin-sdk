@@ -35,11 +35,8 @@ public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
 			Arrays.sort(this._prefs);
 			final BufferedReader in = new BufferedReader(new InputStreamReader(input));
 			
-			String str;
-			
-			
 			this._aliases = new HashMap<String, String>();
-
+			String str;
 			while ((str = in.readLine()) != null) {
 				final String[] splitted = str.split("\t");
 				this._aliases.put(splitted[0], splitted[1]);
