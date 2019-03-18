@@ -12,10 +12,10 @@ public interface HebMatcher {
 	// IMPORTANT: Keep it sorted
 	final static char [] PREFS = {'ב', 'ו','כ', 'ל', 'מ', 'ש'};
 	final static String [] PREFS2 = {
-			"וב", "ול", "ומ", "וש",
-			"כש",
-			"שב", "של", "שמ"
-	};
+	                                           "וב", "ול", "ומ", "וש",
+                                               "כש",
+                                               "שב", "של", "שמ"
+    };
 	default String[] hasWord(String word, Map<String, String> aliases, boolean prefixes) {
 		word = normalizeWord(word);
 		String val;
@@ -35,10 +35,10 @@ public interface HebMatcher {
 			else if (tail.length() > 0) {
 				final String head2 = word.substring(0, 2);
 				final String tail2 = tail.substring(1);
-				if (Arrays.binarySearch(PREFS2, head2) > -1) {
-					val = aliases.get(tail2);
-					return new String[]{tail2, val};
-				}
+                if (Arrays.binarySearch(PREFS2, head2) > -1) {
+                    if ((val = aliases.get(tail2)) != null)
+                        return new String[]{tail2, val};
+                }
 			}
 		}
 
@@ -49,7 +49,7 @@ public interface HebMatcher {
 		if (word == null || word.isEmpty())
 			return null;
 		// remove punctuation
-		word = word.replaceAll("[,.;()\\[\\]{}…?!/:]", "");
+		word = word.replaceAll("\\PL+", "");
 		if (word.isEmpty())
 			return null;
 		final char first = word.charAt(0);

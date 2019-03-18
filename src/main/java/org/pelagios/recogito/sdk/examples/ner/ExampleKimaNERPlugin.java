@@ -20,127 +20,131 @@ import org.pelagios.recogito.sdk.ner.EntityType;
 import org.pelagios.recogito.sdk.ner.NERPlugin;
 
 public class ExampleKimaNERPlugin implements NERPlugin, HebMatcher {
-	private static final Logger LOGGER = Logger.getLogger(ExampleKimaNERPlugin.class.getName());
-	private final StreamHandler sh = new StreamHandler(System.err, new SimpleFormatter());
-	public static final int MAX_WORDS = 7;
-	private HashMap<String, String> _aliases;
-	private final char[] _prefs = { 'ב', 'ל', 'מ', 'ש', 'ו' };
-	private static final String NAMES_FILE = "nba_1500_1940.tsv";
-	private static final int N_MATCHES_TO_LOG = 6;
+    private static final Logger LOGGER = Logger.getLogger(ExampleKimaNERPlugin.class.getName());
+    private final StreamHandler sh = new StreamHandler(System.err, new SimpleFormatter());
+    public static final int MAX_WORDS = 7;
+    private HashMap<String, String> _aliases;
+    private final char[] _prefs = { 'ב', 'ל', 'מ', 'ש', 'ו' };
+    private static final String NAMES_FILE = "nba_1500_1940.tsv";
+    private static final int N_MATCHES_TO_LOG = 12;
 
-	public ExampleKimaNERPlugin() {
+    public ExampleKimaNERPlugin() {
 
-		try {
-			final InputStream input = ClassLoaderUtil.getResourceAsStream(NAMES_FILE, ExampleKimaNERPlugin.class);
-			Arrays.sort(this._prefs);
-			final BufferedReader in = new BufferedReader(new InputStreamReader(input));
-			
-			this._aliases = new HashMap<String, String>();
-			String str;
-			while ((str = in.readLine()) != null) {
-				final String[] splitted = str.split("\t");
-				this._aliases.put(splitted[0], splitted[1]);
-			}
-			in.close();
-			LOGGER.addHandler(this.sh);
-			LOGGER.log( Level.INFO, "KimaNER: succesfully loaded names from {0}", NAMES_FILE);
-		} catch (final IOException e) {
-			e.printStackTrace();
-			this._aliases = new HashMap<String, String>();
-		}
-	}
+        try {
+            final InputStream input = ClassLoaderUtil.getResourceAsStream(NAMES_FILE, ExampleKimaNERPlugin.class);
+            Arrays.sort(this._prefs);
+            final BufferedReader in = new BufferedReader(new InputStreamReader(input));
 
-	@Override
-	public String getName() {
-		return "Example Kima NER Plugin";
-	}
+            this._aliases = new HashMap<String, String>();
+            String str;
+            while ((str = in.readLine()) != null) {
+                final String[] splitted = str.split("\t");
+                this._aliases.put(splitted[0], splitted[1]);
+            }
+            in.close();
+            LOGGER.addHandler(this.sh);
+            LOGGER.log( Level.INFO, "KimaNER: succesfully loaded names from {0}", NAMES_FILE);
+        } catch (final IOException e) {
+            e.printStackTrace();
+            this._aliases = new HashMap<String, String>();
+        }
+    }
 
-	@Override
-	public String getDescription() {
-		return "An attempt to use Kima with the Recogito NER plugin interface.";
-	}
+    @Override
+    public String getName() {
+        return "Example Kima NER Plugin";
+    }
 
-	@Override
-	public String getOrganization() {
-		return "Pelagios Commons";
-	}
+    @Override
+    public String getDescription() {
+        return "An attempt to use Kima with the Recogito NER plugin interface.";
+    }
 
-	@Override
-	public String getVersion() {
-		return "1.0";
-	}
+    @Override
+    public String getOrganization() {
+        return "Pelagios Commons";
+    }
 
-	@Override
-	public List<String> getSupportedLanguages() {
-		final List<String> list = new ArrayList<String>();
-		list.add("he");
+    @Override
+    public String getVersion() {
+        return "1.0";
+    }
 
-		return list;
-	}
+    @Override
+    public List<String> getSupportedLanguages() {
+        final List<String> list = new ArrayList<String>();
+        list.add("he");
 
-	/**
-	 * For testing and demonstration purposes, the dummy NER plugin reports a
-	 * 'LOCATION' entity for every uppercase word. Don't consider this a sensible
-	 */
-	@Override
-	public List<Entity> parse(String text) {
-		final String[] words = text.split("\\s+");
-		final List<Entity> phrases = new ArrayList<Entity>();
+        return list;
+    }
 
-		if (words.length == 0)
-			return phrases;
+    /**
+     * For testing and demonstration purposes, the dummy NER plugin reports a
+     * 'LOCATION' entity for every uppercase word. Don't consider this a sensible
+     */
+    @Override
+    public List<Entity> parse(String text) {
+        final String[] words = text.split("\\s+");
+        final List<Entity> phrases = new ArrayList<Entity>();
 
-		int runningIdx = 0;
-		int runningOffset = 0;
+        if (words.length == 0)
+            return phrases;
 
-		while (runningIdx < words.length) {
-			final String nextWord = words[runningIdx];
-			runningOffset = text.indexOf(nextWord, runningOffset);
+        int runningIdx = 0;
+        int runningOffset = 0;
 
-			for (int j = 0; j < MAX_WORDS && runningIdx + j < words.length; ++j) {
-				final List<String> subWords = Arrays.asList(words).subList(runningIdx, runningIdx + j + 1);
-				final String expr = String.join(" ", subWords);
-				String gazId = null;
-				final String[] gazArr = hasWord(expr, this._aliases, true);
-				if (gazArr != null) {
-					final String gazExpr = gazArr[0];
-					gazId = gazArr[1];
-					URI gnUri = null;
-					try {
-						gnUri = new URI("http://sws.geonames.org/" + gazId);
-					} catch (final URISyntaxException e) {
-						e.printStackTrace();
-					}
-					// HebMatcher might have removed prefixes
-					int newOffset = runningOffset + expr.indexOf(gazExpr);
-					if (newOffset > runningOffset){
-						phrases.add(new Entity(gazExpr, EntityType.LOCATION, newOffset, gnUri));
-					}
-					else {
-						phrases.add(new Entity(expr, EntityType.LOCATION, runningOffset, gnUri));
-					}
-					runningIdx += j;
-					break;
-				}
-			}
+        while (runningIdx < words.length) {
+            final String nextWord = words[runningIdx];
+            runningOffset = text.indexOf(nextWord, runningOffset);
 
-			runningIdx++;
-			runningOffset += nextWord.length();
-		}
+            for (int j = 0; j < MAX_WORDS && runningIdx + j < words.length; ++j) {
+                final List<String> subWords = Arrays.asList(words).subList(runningIdx, runningIdx + j + 1);
+                final String expr = String.join(" ", subWords);
+                String gazId = null;
+                final String[] gazArr = hasWord(expr, this._aliases, true);
+                if (gazArr != null) {
+                    final String gazExpr = gazArr[0];
+                    gazId = gazArr[1];
+                    URI gnUri = null;
+                    if (!gazId.equals("-1")) {
+                        try {
+                            gnUri = new URI("http://sws.geonames.org/" + gazId);
+                        }
+                        catch (final URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    // HebMatcher might have removed prefixes or suffixes
+                    int substringInd = expr.indexOf(gazExpr);
+                    int newOffset = runningOffset + substringInd;
+                    if (newOffset > runningOffset || substringInd > -1 && gazExpr.length() < expr.length()) {
+                        phrases.add(new Entity(gazExpr, EntityType.LOCATION, newOffset, gnUri));
+                    }
+                    else {
+                        phrases.add(new Entity(expr, EntityType.LOCATION, runningOffset, gnUri));
+                    }
+                    runningIdx += j;
+                    break;
+                }
+            }
 
-		final int maxMatchesToLog = Math.min(phrases.size(), N_MATCHES_TO_LOG);
-		LOGGER.log(
-				Level.INFO,
-				"KimaNER: found {0} mathces. The first {1}:",
-				new Object[] {phrases.size(), maxMatchesToLog}
-		);
-		for (int i = 0; i < maxMatchesToLog; ++i) {
-			LOGGER.log(
-					Level.INFO,
-					"{0}. {1}",
-					new Object[] {i + 1, phrases.get(i).toString()}
-					);
-		}
-		return phrases;
-	}
+            runningIdx++;
+            runningOffset += nextWord.length();
+        }
+
+        final int maxMatchesToLog = Math.min(phrases.size(), N_MATCHES_TO_LOG);
+        LOGGER.log(
+            Level.INFO,
+            "\n\nKimaNER: processsing text:\n{0}\nFound {1} mathces. The first {2}:",
+            new Object[] {text, phrases.size(), maxMatchesToLog}
+        );
+        for (int i = 0; i < maxMatchesToLog; ++i) {
+            LOGGER.log(
+                Level.INFO,
+                "{0}. {1}",
+                new Object[] {i + 1, phrases.get(i).toString()}
+            );
+        }
+        return phrases;
+    }
 }

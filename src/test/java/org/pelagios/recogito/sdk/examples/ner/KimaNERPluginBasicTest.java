@@ -9,10 +9,11 @@ import org.junit.Test;
 import org.pelagios.recogito.sdk.ner.Entity;
 import org.pelagios.recogito.sdk.ner.EntityType;
 
-public class KimaNERPluginTest {
+
+public class KimaNERPluginBasicTest {
 
 	private final String SAMPLE_TEXT =
-			"המהרל מירושלים נולד בפראג והגיע לליטא, פולין ולוורשה שבאירופה שוטין";
+			"המהרל מירושלים נולד בפראג והגיע לליטא, פולין ולוורשה שבאירופה שוטין ובתחלה אם אב תוגרמה רוסיא רוסלאנד, זיטאמיר, אדעסא, ענינים שונים";
 
 	private final Entity[] expectedMatches = new Entity[]{
 			new Entity("ירושלים", EntityType.LOCATION, 7),
@@ -20,7 +21,12 @@ public class KimaNERPluginTest {
 			new Entity("ליטא", EntityType.LOCATION, 33),
 			new Entity("פולין", EntityType.LOCATION, 39),
 			new Entity("וורשה", EntityType.LOCATION, 47),
-			new Entity("אירופה", EntityType.LOCATION, 55)
+			new Entity("אירופה", EntityType.LOCATION, 55),
+			new Entity("תוגרמה", EntityType.LOCATION, 81),
+			new Entity("רוסיא", EntityType.LOCATION, 88),
+			new Entity("רוסלאנד", EntityType.LOCATION, 94),
+			new Entity("זיטאמיר", EntityType.LOCATION, 103),
+			new Entity("אדעסא", EntityType.LOCATION, 112)
 	};
 
 	@Test
