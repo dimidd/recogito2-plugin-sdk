@@ -15,5 +15,8 @@ libraryDependencies ++= Seq()
 
 /** Test dependencies **/
 libraryDependencies ++= Seq(
-  "junit" % "junit" % "4.11" % "test"
+  "junit" % "junit" % "4.11" % "test",
+  "com.novocode" % "junit-interface" % "0.10" % "test"
 )
+
+testOptions += Tests.Argument(TestFrameworks.JUnit)
